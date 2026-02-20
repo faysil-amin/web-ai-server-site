@@ -45,6 +45,12 @@ async function run() {
     await client.connect();
     const aiModel = client.db("aiModel");
     const model = aiModel.collection("model");
+    const purchases = aiModel.collection("purchases");
+    app.post("/purchases", async (req, res) => {
+      const cursor = req.body;
+      const result = await purchases.insertOne(cursor);
+      res.send(result);
+    });
     app.get("/add-model", async (req, res) => {
       const cursor = model.find();
       const result = await cursor.toArray();
