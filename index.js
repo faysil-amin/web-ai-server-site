@@ -66,12 +66,22 @@ async function run() {
       const result = await model.deleteOne(query);
       res.send(result);
     });
-    app.patch("/add-model/:id", async (req, res) => {
+    app.patch("/edit/:id", async (req, res) => {
       const id = req.params.id;
       const body = req.body;
       const query = { _id: new ObjectId(id) };
       const update = { $set: { name: body.name } };
       const result = await model.updateOne(query, update);
+      res.send(result);
+    });
+    app.get("/mymodel", async (req, res) => {
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.createdBy = email;
+      }
+      const cursor = model.find(query);
+      const result = await cursor.toArray(cursor);
       res.send(result);
     });
     await client.db("admin").command({ ping: 1 });
