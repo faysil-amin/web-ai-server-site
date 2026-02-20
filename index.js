@@ -25,7 +25,6 @@ const verifation = async (req, res, next) => {
   try {
     const check = await admin.auth().verifyIdToken(token);
     req.token_email = check.email;
-    d;
     next();
   } catch (error) {
     return res.status(401).send({ message: `unauthorize user` });
@@ -56,15 +55,23 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
-    app.post("/add-model", async (req, res) => {
+    app.post("/add-model", verifation, async (req, res) => {
       const cursor = req.body;
       const result = await model.insertOne(cursor);
       res.send(result);
     });
-    app.delete("/add-model/:id", async (req, res) => {
+    app.delete("/add-model/:id", verifation, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await model.deleteOne(query);
+      res.send(result);
+    });
+    app.patch("/add-model/:id", async (req, res) => {
+      const id = req.params.id;
+      const body = req.body;
+      const query = { _id: new ObjectId(id) };
+      const update = { $set: { name: body.name } };
+      const result = await model.updateOne(query, update);
       res.send(result);
     });
     await client.db("admin").command({ ping: 1 });
