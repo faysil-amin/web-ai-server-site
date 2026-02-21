@@ -48,7 +48,20 @@ async function run() {
     const purchases = aiModel.collection("purchases");
     app.post("/purchases", async (req, res) => {
       const cursor = req.body;
+      const exists = await purchases.findOne({
+        createdBy: cursor.createdBy,
+        modelId: cursor.modelId,
+      });
+      if (exists) {
+        return res.send({ message: "Already purchased", inserted: false });
+      }
+
       const result = await purchases.insertOne(cursor);
+      res.send(result);
+    });
+    app.get("/purchases", async (req, res) => {
+      const cursor = purchases.find();
+      const result = await cursor.toArray(cursor);
       res.send(result);
     });
     app.get("/add-model", async (req, res) => {
