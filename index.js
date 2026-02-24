@@ -5,7 +5,11 @@ const port = process.env.PORT || 3000;
 const cors = require("cors");
 const admin = require("firebase-admin");
 
-const serviceAccount = require("./assignment-10-72af4-firebase-adminsdk-fbsvc-5e7bc47e2c.json");
+const decoded = Buffer.from(
+  process.env.FIREBASE_SERVICE_KEY,
+  "base64",
+).toString("utf8");
+const serviceAccount = JSON.parse(decoded);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -115,6 +119,4 @@ app.get("/", (req, res) => {
   res.send("hello world");
 });
 
-app.listen(port, () => {
-  console.log("mongodb start successfully", port);
-});
+export default app;
