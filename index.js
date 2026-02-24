@@ -44,79 +44,81 @@ const client = new MongoClient(uri, {
   },
 });
 
-async function run() {
-  try {
-    await client.connect();
-    const aiModel = client.db("aiModel");
-    const model = aiModel.collection("model");
-    const purchases = aiModel.collection("purchases");
-    app.post("/purchases", async (req, res) => {
-      const cursor = req.body;
-      const exists = await purchases.findOne({
-        createdBy: cursor.createdBy,
-        modelId: cursor.modelId,
-      });
-      if (exists) {
-        return res.send({ message: "Already purchased", inserted: false });
-      }
-
-      const result = await purchases.insertOne(cursor);
-      res.send(result);
-    });
-    app.get("/purchases", async (req, res) => {
-      const cursor = purchases.find();
-      const result = await cursor.toArray(cursor);
-      res.send(result);
-    });
-    app.get("/add-model", async (req, res) => {
-      const cursor = model.find();
-      const result = await cursor.toArray();
-      res.send(result);
-    });
-    app.get("/add-latest-model", async (req, res) => {
-      const cursor = model.find().limit(6);
-      const result = await cursor.toArray();
-      res.send(result);
-    });
-    app.post("/add-model", verifation, async (req, res) => {
-      const cursor = req.body;
-      const result = await model.insertOne(cursor);
-      res.send(result);
-    });
-    app.delete("/add-model/:id", verifation, async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await model.deleteOne(query);
-      res.send(result);
-    });
-    app.patch("/edit/:id", async (req, res) => {
-      const id = req.params.id;
-      const body = req.body;
-      const query = { _id: new ObjectId(id) };
-      const update = { $set: { name: body.name } };
-      const result = await model.updateOne(query, update);
-      res.send(result);
-    });
-    app.get("/mymodel", async (req, res) => {
-      const email = req.query.email;
-      const query = {};
-      if (email) {
-        query.createdBy = email;
-      }
-      const cursor = model.find(query);
-      const result = await cursor.toArray(cursor);
-      res.send(result);
-    });
-    // await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!",
-    );
-  } finally {
+// async function run() {
+//   try {
+//     await client.connect();
+const aiModel = client.db("aiModel");
+const model = aiModel.collection("model");
+const purchases = aiModel.collection("purchases");
+app.post("/purchases", async (req, res) => {
+  const cursor = req.body;
+  const exists = await purchases.findOne({
+    createdBy: cursor.createdBy,
+    modelId: cursor.modelId,
+  });
+  if (exists) {
+    return res.send({ message: "Already purchased", inserted: false });
   }
-}
-run().catch(console.dir);
+
+  const result = await purchases.insertOne(cursor);
+  res.send(result);
+});
+app.get("/purchases", async (req, res) => {
+  const cursor = purchases.find();
+  const result = await cursor.toArray();
+  res.send(result);
+});
+app.get("/add-model", async (req, res) => {
+  const cursor = model.find();
+  const result = await cursor.toArray();
+  res.send(result);
+});
+app.get("/add-latest-model", async (req, res) => {
+  const cursor = model.find().limit(6);
+  const result = await cursor.toArray();
+  res.send(result);
+});
+app.post("/add-model", verifation, async (req, res) => {
+  const cursor = req.body;
+  const result = await model.insertOne(cursor);
+  res.send(result);
+});
+app.delete("/add-model/:id", verifation, async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const result = await model.deleteOne(query);
+  res.send(result);
+});
+app.patch("/edit/:id", async (req, res) => {
+  const id = req.params.id;
+  const body = req.body;
+  const query = { _id: new ObjectId(id) };
+  const update = { $set: { name: body.name } };
+  const result = await model.updateOne(query, update);
+  res.send(result);
+});
+app.get("/mymodel", async (req, res) => {
+  const email = req.query.email;
+  const query = {};
+  if (email) {
+    query.createdBy = email;
+  }
+  const cursor = model.find(query);
+  const result = await cursor.toArray();
+  res.send(result);
+});
+// await client.db("admin").command({ ping: 1 });
+//     console.log(
+//       "Pinged your deployment. You successfully connected to MongoDB!",
+//     );
+//   } finally {
+//   }
+// }
+// run().catch(console.dir);
 app.get("/", (req, res) => {
   res.send("hello world");
 });
 
-export default app;
+app.listen(port, () => {
+  console.log("hello");
+});
